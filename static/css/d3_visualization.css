@@ -1,0 +1,340 @@
+#body_results{
+    background-color: #EFEEF1;
+}
+
+html{
+    /* font-family: 'Open Sans', sans-serif; */
+}
+
+
+h1{
+    position: absolute; 
+    left: 0; 
+    right: 0; 
+    margin-left: auto; 
+    margin-right: auto; 
+    width: 700px; 
+    font-family: 'Open Sans', sans-serif;
+    padding-left: .5%;
+    top: 2.5%;
+}
+
+center{
+    position: absolute; 
+    position: absolute; 
+    left: 0; 
+    right: 0; 
+    margin-left: auto; 
+    margin-right: auto; 
+    width: 100%; 
+    top: 10%;
+}
+
+/* Main tsne chart */
+#dataviz_axisZoom{
+    position:absolute;
+    left:15px;
+    top:190px;
+    height: 500px;
+    width: 700px;
+    z-index: 1;
+}
+
+#dataviz_axisZoom svg{
+    position: relative;
+    background-color: white;
+    border-radius:12px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+    height: 550px
+
+}
+
+#pred_but{
+    position: absolute;
+    left: 22px;
+    bottom: 50px;
+    font-size: 17px;
+}
+
+/* autoOD pred filter button */
+#metric{
+    position: absolute;
+    width:175px;
+    height: 30px;
+    border-radius:5px;
+    left: 0px;
+    bottom: -30px;
+    font-size: 15px;
+}
+
+#correct_but{
+    position: absolute; 
+    left: 576px;
+    bottom: 50px;
+    font-size: 17px;
+}
+
+/* Correct filter button */
+#selectButton_correct{
+    position: absolute;
+    left: 0px;
+    bottom: -30px;
+    width:175px;
+    height: 30px;
+    border-radius:5px;
+    font-size: 15px;
+}
+
+#label_but{
+    position: absolute;
+    left: 298px;
+    bottom: 50px;
+    font-size: 17px;
+}
+
+/* Ground truth filter button */
+#selectButton_label{
+    position: absolute;
+    width:175px;
+    height: 30px;
+    border-radius:5px;
+    left: 0px;
+    bottom: -30px;
+    font-size: 15px;
+}
+
+/* round relibale labels filter button */
+#selectButton_round{
+    width:75px;
+    border-radius:5px;
+
+
+}
+
+/* Slider for reliable labels */
+#slider-step{
+
+}
+
+/* barplot for param. */
+#barplot{
+    height: 715px;
+    float: right;
+    left:400px;
+    bottom:-304px; 
+    background-color: white;
+    border-radius:10px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+}
+
+#barplot2{
+    height: 715px;
+    float: left;
+    background-color: white;
+    border-radius:10px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+}  
+
+#temp{
+    position:relative; 
+    left:-5px;
+    bottom:5px; 
+    width: 1790px;
+}
+
+/* table for each data point att. */
+#table_wrapper{
+    position:absolute; 
+    left:1300px;
+    bottom:-790px; 
+    width: 15%;
+}
+
+#table2_wrapper{
+    position:absolute; 
+    left:900px;
+    bottom:-790px;
+    width: 15%;
+}
+
+#popup_chart{
+    position:relative; 
+    left:840px;
+    bottom:-145px;
+    width:760px;
+}
+
+/* Control panel (filter dropdowns) */
+#filter{
+    position:absolute; 
+    left:15px;
+    top:6%;
+    background-color: white;
+    width: 760px;
+    height: 100px;
+    border-radius:10px;
+    padding-left: .5%;
+    padding-top: .2%;
+    padding-bottom: .2%;
+    font-family: 'Open Sans', sans-serif;
+    vertical-align: baseline;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+
+}
+
+#reliable_inout_div{
+    font-family: 'Open Sans', sans-serif;
+    
+}
+
+#reliable_inout{
+    width:140px;
+    border-radius:5px;
+}
+
+#filtertitle{
+    font-size: 21px;
+    font-family: 'Open Sans', sans-serif;
+
+}
+
+#reliable_output{
+    position:absolute; 
+    left:485px;  
+    top:12%;
+}
+
+#reliable_labels{
+    font-family: 'Open Sans', sans-serif;
+    position:absolute; 
+    left:15px;
+    /* top: 85%; */
+    top: 770px;
+    background-color: white;
+    border-radius:12px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+    width:760px;
+    padding-left: .5%;
+    padding-top: .2%;
+    padding-bottom: .2%;
+    height: 130px;
+
+}
+
+select{
+    font-family: 'Open Sans', sans-serif;
+}
+
+/* hor. line */
+/* .vl{
+    border-left: 1px solid black;
+    height: 900px;
+    position: absolute;
+    left: 800px;
+    top: 35px;
+    z-index: -3;
+} */
+
+
+.legend{ 
+    list-style: none; 
+    position: absolute;
+    left: 664px;
+    top: 193px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 15px;
+    background-color: white;
+    width: 112px;
+    height: 50px;
+    border-radius:12px;
+    padding-left: .5%;
+    padding-top: .2%;
+    padding-bottom: .2%;
+    z-index: 1;
+    opacity: 0.9;
+    /* box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1); */
+    vertical-align: baseline;
+
+}
+
+.legend li{ 
+    float: left; 
+    margin-right: 10px; 
+}
+
+.legend span{ 
+    border: 1px solid #ccc; 
+    float: left; 
+    width: 12px; 
+    height: 12px; 
+    margin: 5px; 
+}
+
+.legend .inlier{ 
+    background-color: SteelBlue; 
+    width: 10px; 
+    height: 10px; 
+    border-radius:50px;
+}
+
+.legend .outlier{
+    background-color: #FFA500;
+    width: 10px; 
+    height: 10px; 
+    border-radius:50px;
+}
+
+.legend .incorrect{
+    border-color: black;
+    width: 17px; 
+    height: 17px; 
+    border-radius:50px;
+}
+
+/* li{
+    font-size: 15px;
+} */
+
+ul{
+    position: fixed;
+    top: 0;
+    width: 100%;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
+    padding-bottom: .5%;
+    padding-top: .5%;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 20px;
+    z-index: 3
+}
+
+li {
+    display: inline;
+}
+
+li a {  
+    color: white;
+    padding: 14px 16px;
+    text-decoration: none;
+   
+  }
+  
+  /* Change the link color to #111 (black) on hover */
+  li a:hover {
+    background-color: #111;
+  }
+
+  .active {
+    background-color: maroon;
+    padding-bottom: .5%;
+    padding-top: .5%;
+  }
+
+#body_results{
+    z-index: 100;
+}
+
+ 
