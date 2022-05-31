@@ -39,32 +39,6 @@ if database == "y":
  
 simplefilter(action='ignore', category=FutureWarning)
 
-##### DH: to pull f1 at every iteration #####
-def f1_at_iter(iter, num_rel_set, num_det, inliers, outliers, f1):
-    with open(f"iteration.csv", "a+") as csvfile:
-        csvwriter= csv.writer(csvfile)
-        csvwriter.writerows([[iter, num_rel_set, num_det, inliers, outliers, f1]])
-
-## Keeping track of detectors f1 score and when they are pruned out
-detectors_df = pd.DataFrame()
-detector_id_ls = []  # id of detectors
-detector_method_ls = []  # what method, e.g. lof, IF
-detector_param_ls = []  # paramiters for the method
-detector_prune_ls = []  # what iteration was it pruned
-detector_f1_ls = []  # F1 from detector
-
-detector_keep_id_ls = []
-detector_keep_iter_ls = []
-detector_keep_f1_ls = []
-
-detector_id_final = []  # id of detectors
-detector_method_final = []  # what method, e.g. lof, IF
-detector_param_final = []  # paramiters for the method
-detector_prune_final = []  # what iteration was it pruned
-detector_f1_final = []  # F1 from detector
-##### DH: to pull f1 at every iteration #####
-
-
 class OutlierDetectionMethod(Enum):
     LOF = auto()
     KNN = auto()
@@ -135,7 +109,7 @@ def load_dataset(filename, index_col_name = None, label_col_name=None):
         with open(filename, 'r') as f:
             data, meta = arff.loadarff(f)
         data = pd.DataFrame(data)
-        data = data.sample(n=500, random_state = 15)  # DH: added to debug code locally
+        #data = data.sample(n=500, random_state = 15)  # DH: added to debug code locally
         data = data.rename(columns={index_col_name :'id', label_col_name : 'label'})  # DH set all data to the same label and id col names
         index_col_name = 'id'
         label_col_name = 'label'
@@ -169,7 +143,7 @@ def load_dataset(filename, index_col_name = None, label_col_name=None):
         data = data.rename(columns={index_col_name :'id', label_col_name : 'label'})  # DH set all data to the same label and id col names
         index_col_name = 'id'
         label_col_name = 'label'
-        data = data.sample(n=500, random_state = 15)  # DH: added to debug code locally
+        #data = data.sample(n=500, random_state = 15)  # DH: added to debug code locally
         if database == "y":
             
             import psycopg2
@@ -275,12 +249,6 @@ class AutoOD:
                 if y is not None:
                     f1 = get_f1_scores(predictions=lof_predictions,y = y)  # f1 score for each of the detectors? 
                     f1s.append(f1)
-                    #### DH ####
-                    detector_f1_ls.append(f1)
-                    detector_param_ls.append([krange_list[i], knn_N_range[i]])
-                    detector_method_ls.append("LOF")
-                    detector_id_ls.append(i)
-                    #### DH ####
 
             if database == "y":  # DHDB
                 insert_input("detectors", lof_df)
@@ -327,12 +295,6 @@ class AutoOD:
                 if y is not None:
                     f1 = get_f1_scores(predictions=knn_predictions,y = y)
                     f1s.append(f1)
-                    #### DH ####
-                    detector_f1_ls.append(f1)
-                    detector_param_ls.append([krange_list[i], knn_N_range[i]])
-                    detector_method_ls.append("KNN")
-                    detector_id_ls.append(detector_id_ls[-1] + 1)
-                    #### DH ####
 
             if database == "y":  # DHDB
                 insert_input("detectors", knn_df)
@@ -380,12 +342,6 @@ class AutoOD:
                 if y is not None:
                     f1 = get_f1_scores(predictions=if_predictions,y = y)
                     f1s.append(f1)
-                    #### DH ####
-                    detector_f1_ls.append(f1)
-                    detector_param_ls.append([if_range_list[i], knn_N_range[i]])
-                    detector_method_ls.append("IF")
-                    detector_id_ls.append(detector_id_ls[-1] + 1)
-                    #### DH ####
 
             if database == "y":  # DHDB
                 insert_input("detectors", if_df)
@@ -427,14 +383,6 @@ class AutoOD:
                     f1 = get_f1_scores(mahalanobis_predictions, y)
                     best_mahala_f1 = max(best_mahala_f1, f1)
                     f1s.append(f1)
-                    #### DH ####
-                    detector_f1_ls.append(f1)
-                    detector_param_ls.append(N_range[i])
-                    detector_method_ls.append("Mahalanobis")
-                    detector_id_ls.append(detector_id_ls[-1] + 1)
-                    global detector_prune_ls
-                    detector_prune_ls = [-1] * len(detector_f1_ls)  # what iteration was it pruned
-                    #### DH ####
 
             if database == "y":  # DHDB
                 insert_input("detectors", mahala_df)
@@ -486,7 +434,7 @@ class AutoOD:
         # stable version
         high_confidence_threshold = 0.99
         low_confidence_threshold = 0.01
-        max_iter = 5000000000000000000000000000000000000000000000000000 # DH was 200 
+        max_iter = 200 # DH was 200 
         remain_params_tracking = np.array(range(0, np.max(coef_index_range)))
         training_data_F1 = []
         two_prediction_corr = []
@@ -525,13 +473,13 @@ class AutoOD:
                     self_agree_index_list = np.union1d(self_agree_index_list, temp_index)
                 self_agree_index_list = [int(i) for i in self_agree_index_list]
 
-            all_outlier_indexes = np.union1d(all_outlier_indexes, self_agree_index_list)  # add empty set if outliers are in reliable set, else add self agree as well
+            all_outlier_indexes = np.union1d(all_outlier_indexes, self_agree_index_list)  # add empty set if outliers are in reliable set, else add self agree
             if(len(np.setdiff1d(all_outlier_indexes, prediction_classifier_disagree)) != 0):  # DH: remove reliable only if set will not be 0
                 all_outlier_indexes = np.setdiff1d(all_outlier_indexes, prediction_classifier_disagree)  
 
             #### DH
             self_agree_index_list_inlier = []
-            if ((len(all_inlier_indexes) == 0)):  # DH: requierments are relaxed 
+            if ((len(all_inlier_indexes) == 0)):  # DH: requirements are relaxed 
                 for i in range(0, len(index_range)):
                     if (index_range[i, 1] - index_range[i, 0] <= 6):
                         continue
@@ -635,37 +583,6 @@ class AutoOD:
                             saved_indexes = np.where(cur_clf_coef[s1:e1] > cutoff)[0]
                             for j in range(N_size):
                                 remain_indexes_after_cond_expanded.extend(np.array(saved_indexes) + j * s_e_range + s2)
-                        
-                        #### DH #### tracking when detectors are removed ||| The problem is that the idcies are reordered at each iteration
-                        global detector_prune_ls
-                        for index, item in enumerate(detector_id_ls):
-                            if index not in remain_indexes_after_cond_expanded:  # if detector was pruned out at this iteration
-                               detector_prune_ls[index] = i_range
-                            if index in remain_indexes_after_cond_expanded:  # if detector was not pruned
-                                detector_keep_f1_ls.append(detector_f1_ls[index])
-                                detector_keep_iter_ls.append(i_range)
-
-                        
-                        i_dh2 = 0
-                        while (i_dh2 < (len(detector_prune_ls))):  # we need to remove detectors that are pruned
-                            if detector_prune_ls[i_dh2] != -1: 
-                                detector_prune_final.append(detector_prune_ls[i_dh2])
-                                detector_f1_final.append(detector_f1_ls[i_dh2])
-                                detector_id_final.append(i_dh2)
-                                detector_param_final.append(detector_f1_ls[i_dh2])
-                                detector_method_final.append(detector_method_ls[i_dh2])
-                                
-                                detector_prune_ls.remove(detector_prune_ls[i_dh2])
-                                detector_f1_ls.remove(detector_f1_ls[i_dh2])
-                                detector_id_ls.remove(detector_id_ls[i_dh2])
-                                detector_param_ls.remove(detector_param_ls[i_dh2])
-                                detector_method_ls.remove(detector_method_ls[i_dh2])                                
-                                i_dh2 = i_dh2 - 1  # since we removed 
-                            i_dh2 = i_dh2 + 1
-
-
-
-                        #### DH #### tracking when detectors are removed
 
                         new_coef_index_range_seq = []
                         for i in range(0, len(coef_index_range)): 
@@ -700,22 +617,13 @@ class AutoOD:
                 np.put(full_data, prediction_high_conf_outliers, 1)
                 temp_reliable_df = pd.DataFrame()
                 temp_reliable_df["id"] = X.index
-                #temp_reliable_df = temp_reliable_df.sort_values(by=["id"])  # dont think we need to sort here
+                #temp_reliable_df = temp_reliable_df.sort_values(by=["id"])
                 temp_reliable_df["iteration"] = i_range
                 temp_reliable_df["reliable"] = full_data
                 reliable_df = reliable_df.append(temp_reliable_df)
         if database == "y":  # DHDB
             #reliable_df = reliable_df.convert_dtypes()
             insert_input("reliable", reliable_df)
-        
-        #### DH ####
-        detectors_df = pd.DataFrame(list(zip(detector_prune_final, detector_f1_final, detector_id_final, detector_param_final, detector_method_final)), 
-        columns =['iteration_pruned', 'F1', 'id', 'parmiters', 'method'])
-        
-        #temp_keep_df = pd.DataFrame(list(zip(detector_keep_iter_ls, detector_keep_f1_ls)), columns = ['iter', 'f1'])
-        #temp_keep_df = temp_keep_df.groupby(['iter']).mean() 
-        detectors_df.to_csv("detector_prune_shuttle_test.csv", header=True, index=True)
-        #### DH ####
 
         # Prepare second round AutoOD
         index_range = np.array(instance_index_ranges)
@@ -769,7 +677,7 @@ class AutoOD:
         remain_params_tracking = np.array(range(0, np.max(coef_index_range)))
 
         if np.max(coef_index_range) >= 2:
-            if (len(prediction_high_conf_outliers) > 0 and len(prediction_high_conf_inliers) > 0):  # losen requirments 
+            if (len(prediction_high_conf_outliers) > 0 and len(prediction_high_conf_inliers) > 0):  # losen requirements 
                 new_data_indexes = np.concatenate((prediction_high_conf_outliers, prediction_high_conf_inliers), axis=0)
                 new_data_indexes = np.array([int(i) for i in new_data_indexes])
                 new_labels = np.concatenate(
@@ -839,7 +747,7 @@ class AutoOD:
             all_inlier_indexes = np.setdiff1d(all_inlier_indexes, prediction_classifier_disagree)
 
             self_agree_index_list = []
-            if ((len(all_outlier_indexes) == 0) or (len(all_inlier_indexes) / len(all_outlier_indexes) > 1000)):  # losen requirments 
+            if ((len(all_outlier_indexes) == 0) or (len(all_inlier_indexes) / len(all_outlier_indexes) > 1000)):  # losen requirements 
                 for i in range(0, len(index_range)):
                     if (index_range[i, 1] - index_range[i, 0] <= 6):
                         continue
@@ -855,7 +763,7 @@ class AutoOD:
 
              #### DH
             self_agree_index_list_inlier = []
-            if ((len(all_inlier_indexes) == 0)):  # here is where requierments are relaxed 
+            if ((len(all_inlier_indexes) == 0)):  # here is where requirements are relaxed 
                 for i in range(0, len(index_range)):
                     if (index_range[i, 1] - index_range[i, 0] <= 6):
                         continue
