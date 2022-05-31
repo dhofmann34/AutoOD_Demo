@@ -18,10 +18,19 @@ from sklearn.svm import SVC
 from sklearn.preprocessing import RobustScaler
 import time
 from loguru import logger
+from psycopg2.extensions import register_adapter, AsIs
 import scipy.linalg
 import sys
+import csv
 
 database = "y"  # DHDB "y" if we want to connect to database for demo
+
+def addapt_numpy_float64(numpy_float64):
+    return AsIs(numpy_float64)
+def addapt_numpy_int64(numpy_int64):
+    return AsIs(numpy_int64)
+register_adapter(np.float64, addapt_numpy_float64)
+register_adapter(np.int64, addapt_numpy_int64)
 
 if database == "y":
     from connect import insert_input  # DHDB
@@ -29,6 +38,31 @@ if database == "y":
     from connect import create_input_table
  
 simplefilter(action='ignore', category=FutureWarning)
+
+##### DH: to pull f1 at every iteration #####
+def f1_at_iter(iter, num_rel_set, num_det, inliers, outliers, f1):
+    with open(f"iteration.csv", "a+") as csvfile:
+        csvwriter= csv.writer(csvfile)
+        csvwriter.writerows([[iter, num_rel_set, num_det, inliers, outliers, f1]])
+
+## Keeping track of detectors f1 score and when they are pruned out
+detectors_df = pd.DataFrame()
+detector_id_ls = []  # id of detectors
+detector_method_ls = []  # what method, e.g. lof, IF
+detector_param_ls = []  # paramiters for the method
+detector_prune_ls = []  # what iteration was it pruned
+detector_f1_ls = []  # F1 from detector
+
+detector_keep_id_ls = []
+detector_keep_iter_ls = []
+detector_keep_f1_ls = []
+
+detector_id_final = []  # id of detectors
+detector_method_final = []  # what method, e.g. lof, IF
+detector_param_final = []  # paramiters for the method
+detector_prune_final = []  # what iteration was it pruned
+detector_f1_final = []  # F1 from detector
+##### DH: to pull f1 at every iteration #####
 
 
 class OutlierDetectionMethod(Enum):
@@ -101,7 +135,7 @@ def load_dataset(filename, index_col_name = None, label_col_name=None):
         with open(filename, 'r') as f:
             data, meta = arff.loadarff(f)
         data = pd.DataFrame(data)
-        #data = data.sample(n=500, random_state = 15)  # DH: added to debug code locally
+        data = data.sample(n=500, random_state = 15)  # DH: added to debug code locally
         data = data.rename(columns={index_col_name :'id', label_col_name : 'label'})  # DH set all data to the same label and id col names
         index_col_name = 'id'
         label_col_name = 'label'
@@ -117,6 +151,11 @@ def load_dataset(filename, index_col_name = None, label_col_name=None):
             cur.close()
             conn.close()
 
+            # SQL does not allow numeric values to be column names
+            columnNames = data.columns[pd.to_numeric(data.columns, errors='coerce').to_series().notnull()]
+            for name in columnNames:
+                data.rename(columns={name : f'_{name}_'}, inplace=True)                     
+
             create_input_table(data)
             insert_input("input", data)  # DHDB
             insert_tsne("tsne", data, label_col_name, index_col_name)
@@ -130,7 +169,7 @@ def load_dataset(filename, index_col_name = None, label_col_name=None):
         data = data.rename(columns={index_col_name :'id', label_col_name : 'label'})  # DH set all data to the same label and id col names
         index_col_name = 'id'
         label_col_name = 'label'
-        #data = data.sample(n=500, random_state = 15)  # DH: added to debug code locally
+        data = data.sample(n=500, random_state = 15)  # DH: added to debug code locally
         if database == "y":
             
             import psycopg2
@@ -142,6 +181,11 @@ def load_dataset(filename, index_col_name = None, label_col_name=None):
             conn.commit()
             cur.close()
             conn.close()
+
+            # SQL does not allow numeric values to be column names
+            columnNames = data.columns[pd.to_numeric(data.columns, errors='coerce').to_series().notnull()]
+            for name in columnNames:
+                data.rename(columns={name : f'_{name}_'}, inplace=True)  
         
             create_input_table(data)
             insert_input("input", data)  # DHDB
@@ -216,7 +260,7 @@ class AutoOD:
                 col_names = ["id", "detector", "k", "n", "prediction", "score"]
                 lof_df = pd.DataFrame(columns = col_names)
             for i in range(len(krange_list)):
-                lof_predictions, lof_scores = get_predictions(temp_lof_results[krange_list[i]], num_outliers=knn_N_range[i])
+                lof_predictions, lof_scores = get_predictions(temp_lof_results[krange_list[i]], num_outliers=knn_N_range[i])  # DH: get predictions takes in num outliers
                 all_results.append(lof_predictions)
                 all_scores.append(lof_scores)
                 if database == "y":  #DHDB
@@ -229,8 +273,15 @@ class AutoOD:
                     temp_lof_data["score"] = lof_scores
                     lof_df = lof_df.append(temp_lof_data)
                 if y is not None:
-                    f1 = get_f1_scores(predictions=lof_predictions,y = y)
+                    f1 = get_f1_scores(predictions=lof_predictions,y = y)  # f1 score for each of the detectors? 
                     f1s.append(f1)
+                    #### DH ####
+                    detector_f1_ls.append(f1)
+                    detector_param_ls.append([krange_list[i], knn_N_range[i]])
+                    detector_method_ls.append("LOF")
+                    detector_id_ls.append(i)
+                    #### DH ####
+
             if database == "y":  # DHDB
                 insert_input("detectors", lof_df)
             f1_list_end_index = len(f1s)
@@ -240,8 +291,8 @@ class AutoOD:
             if y is not None:
                 best_lof_f1 = 0
                 for i in np.sort(self.params.k_range):
-                    temp_f1 = max(np.array(f1s[f1_list_start_index: f1_list_end_index])[np.where(np.array(krange_list) == i)[0]])
-                    best_lof_f1 = max(best_lof_f1, temp_f1)
+                    temp_f1 = max(np.array(f1s[f1_list_start_index: f1_list_end_index])[np.where(np.array(krange_list) == i)[0]])  # DH self.params.k_range is our paramiters. aka len(self.params.k_range) = num of detectors
+                    best_lof_f1 = max(best_lof_f1, temp_f1)  # DH here we can set up a dict of detector id and the f1 score?
                 methods_to_best_f1["LOF"] = best_lof_f1
                 self.logger.info('Best LOF F-1 = {}'.format(best_lof_f1))
 
@@ -276,6 +327,13 @@ class AutoOD:
                 if y is not None:
                     f1 = get_f1_scores(predictions=knn_predictions,y = y)
                     f1s.append(f1)
+                    #### DH ####
+                    detector_f1_ls.append(f1)
+                    detector_param_ls.append([krange_list[i], knn_N_range[i]])
+                    detector_method_ls.append("KNN")
+                    detector_id_ls.append(detector_id_ls[-1] + 1)
+                    #### DH ####
+
             if database == "y":  # DHDB
                 insert_input("detectors", knn_df)
             f1_list_end_index = len(f1s)
@@ -322,6 +380,13 @@ class AutoOD:
                 if y is not None:
                     f1 = get_f1_scores(predictions=if_predictions,y = y)
                     f1s.append(f1)
+                    #### DH ####
+                    detector_f1_ls.append(f1)
+                    detector_param_ls.append([if_range_list[i], knn_N_range[i]])
+                    detector_method_ls.append("IF")
+                    detector_id_ls.append(detector_id_ls[-1] + 1)
+                    #### DH ####
+
             if database == "y":  # DHDB
                 insert_input("detectors", if_df)
             f1_list_end_index = len(f1s)
@@ -362,6 +427,15 @@ class AutoOD:
                     f1 = get_f1_scores(mahalanobis_predictions, y)
                     best_mahala_f1 = max(best_mahala_f1, f1)
                     f1s.append(f1)
+                    #### DH ####
+                    detector_f1_ls.append(f1)
+                    detector_param_ls.append(N_range[i])
+                    detector_method_ls.append("Mahalanobis")
+                    detector_id_ls.append(detector_id_ls[-1] + 1)
+                    global detector_prune_ls
+                    detector_prune_ls = [-1] * len(detector_f1_ls)  # what iteration was it pruned
+                    #### DH ####
+
             if database == "y":  # DHDB
                 insert_input("detectors", mahala_df)
             f1_list_end_index = len(f1s)
@@ -412,7 +486,7 @@ class AutoOD:
         # stable version
         high_confidence_threshold = 0.99
         low_confidence_threshold = 0.01
-        max_iter = 200  # DH was 200 
+        max_iter = 5000000000000000000000000000000000000000000000000000 # DH was 200 
         remain_params_tracking = np.array(range(0, np.max(coef_index_range)))
         training_data_F1 = []
         two_prediction_corr = []
@@ -428,7 +502,7 @@ class AutoOD:
             col_names = ["id", "iteration", "reliable"]
             reliable_df = pd.DataFrame(columns = col_names)
         for i_range in range(0, 50):
-            num_methods = np.shape(L)[1]  # L is matrix: data points x unsup methods
+            num_methods = np.shape(L)[1]  # L is matrix: data points x unsup methods, L[0] gives us the number of detectors
             agree_outlier_indexes = np.sum(L, axis=1) == np.shape(L)[1]  # index of all datapoints where they all agree on outlier
             agree_inlier_indexes = np.sum(L, axis=1) == 0
             disagree_indexes = np.where(np.logical_or(np.sum(L, axis=1) == 0, np.sum(L, axis=1) == num_methods) == 0)[0]
@@ -506,6 +580,7 @@ class AutoOD:
             if y is not None:
                 self.logger.info(
                     f'Iteration = {i_range}, F-1 score = {metrics.f1_score(y, np.array([int(i) for i in clf_predict_proba_X > 0.5]))}')
+                #f1_at_iter(f"1_{i_range}", len(X_training_data), len(L[0]), len(all_inlier_indexes), len(all_outlier_indexes), metrics.f1_score(y, np.array([int(i) for i in clf_predict_proba_X > 0.5])))  # DH
             else:
                 self.logger.info(f"Iteration = {i_range}")
             prediction_result_list.append(clf_predict_proba)
@@ -513,30 +588,32 @@ class AutoOD:
 
             prediction_list.append(np.array([int(i) for i in clf_predictions]))
 
-            prediction_high_conf_outliers = np.intersect1d(
-                np.where(prediction_result_list[-1] > high_confidence_threshold)[0],
-                np.where(classifier_result_list[-1] > high_confidence_threshold)[0])
+            prediction_high_conf_outliers = np.intersect1d(  # DH select high conf outliers
+                np.where(prediction_result_list[-1] > high_confidence_threshold)[0],  # results from logistic regression
+                np.where(classifier_result_list[-1] > high_confidence_threshold)[0])  # results from SVM
 
-            prediction_high_conf_inliers = np.intersect1d(
+            prediction_high_conf_inliers = np.intersect1d(  # DH select high conf inliers
                 np.where(prediction_result_list[-1] < low_confidence_threshold)[0],
                 np.where(classifier_result_list[-1] < low_confidence_threshold)[0])
 
-            temp_prediction = np.array([int(i) for i in prediction_result_list[-1] > 0.5])
-            temp_classifier = np.array([int(i) for i in classifier_result_list[-1] > 0.5])
-            prediction_classifier_disagree = np.where(temp_prediction != temp_classifier)[0]
+            temp_prediction = np.array([int(i) for i in prediction_result_list[-1] > 0.5])  # logistic
+            temp_classifier = np.array([int(i) for i in classifier_result_list[-1] > 0.5])  # SVM
+            prediction_classifier_disagree = np.where(temp_prediction != temp_classifier)[0]  # gets index of where do SVM and log. disagree
 
-            two_prediction_corr.append(np.corrcoef(clf_predict_proba, clf_predict_proba_X)[0, 1])
+            two_prediction_corr.append(np.corrcoef(clf_predict_proba, clf_predict_proba_X)[0, 1])  # Return Pearson product-moment correlation coefficients
 
             if np.max(coef_index_range) >= 2:
                 if (len(prediction_high_conf_outliers) > 0 and len(prediction_high_conf_inliers) > 0):
+                    # reliabel object set, SVM and log. agree
                     new_data_indexes = np.concatenate((prediction_high_conf_outliers, prediction_high_conf_inliers),
                                                       axis=0)
                     new_data_indexes = np.array([int(i) for i in new_data_indexes])
+                    # update new labels based on SVM and log.
                     new_labels = np.concatenate(
                         (np.ones(len(prediction_high_conf_outliers)), np.zeros(len(prediction_high_conf_inliers))),
                         axis=0)
                     clf_prune_2 = LogisticRegression(random_state=0, penalty='l2', max_iter=max_iter).fit(
-                        scores_transformed[new_data_indexes], new_labels)
+                        scores_transformed[new_data_indexes], new_labels)  # train log with updated labels: this is to prune poor detectors
                     combined_coef = clf_prune_2.coef_[0]
                 else:
                     combined_coef = clf.coef_[0]
@@ -544,20 +621,51 @@ class AutoOD:
                 if (np.max(coef_index_range) >= 2):
                     if (len(set(combined_coef)) > 1):
                         cur_clf_coef = combined_coef
-                        cutoff = max(max(0, np.mean(combined_coef) - np.std(combined_coef)), min(combined_coef))
+                        cutoff = max(max(0, np.mean(combined_coef) - np.std(combined_coef)), min(combined_coef))  # cutoff to purne poor detectors
 
                         remain_indexes_after_cond = (
                                 cur_clf_coef > cutoff)  # np.logical_and(cur_clf_coef > cutoff, abs(cur_clf_coef) > 0.01) 
-                        remain_params_tracking = remain_params_tracking[remain_indexes_after_cond]
+                        remain_params_tracking = remain_params_tracking[remain_indexes_after_cond]  # prune poor detectors
 
-                        remain_indexes_after_cond_expanded = []
-                        for i in range(0, len(coef_index_range)):  #
+                        remain_indexes_after_cond_expanded = []  # update index for reliable set: Can we use this to keep track of when detectors are removed?
+                        for i in range(0, len(coef_index_range)):  
                             s_e_range = coef_index_range[i, 1] - coef_index_range[i, 0]
                             s1, e1 = coef_index_range[i, 0], coef_index_range[i, 1]
                             s2, e2 = index_range[i, 0], index_range[i, 1]
                             saved_indexes = np.where(cur_clf_coef[s1:e1] > cutoff)[0]
                             for j in range(N_size):
                                 remain_indexes_after_cond_expanded.extend(np.array(saved_indexes) + j * s_e_range + s2)
+                        
+                        #### DH #### tracking when detectors are removed ||| The problem is that the idcies are reordered at each iteration
+                        global detector_prune_ls
+                        for index, item in enumerate(detector_id_ls):
+                            if index not in remain_indexes_after_cond_expanded:  # if detector was pruned out at this iteration
+                               detector_prune_ls[index] = i_range
+                            if index in remain_indexes_after_cond_expanded:  # if detector was not pruned
+                                detector_keep_f1_ls.append(detector_f1_ls[index])
+                                detector_keep_iter_ls.append(i_range)
+
+                        
+                        i_dh2 = 0
+                        while (i_dh2 < (len(detector_prune_ls))):  # we need to remove detectors that are pruned
+                            if detector_prune_ls[i_dh2] != -1: 
+                                detector_prune_final.append(detector_prune_ls[i_dh2])
+                                detector_f1_final.append(detector_f1_ls[i_dh2])
+                                detector_id_final.append(i_dh2)
+                                detector_param_final.append(detector_f1_ls[i_dh2])
+                                detector_method_final.append(detector_method_ls[i_dh2])
+                                
+                                detector_prune_ls.remove(detector_prune_ls[i_dh2])
+                                detector_f1_ls.remove(detector_f1_ls[i_dh2])
+                                detector_id_ls.remove(detector_id_ls[i_dh2])
+                                detector_param_ls.remove(detector_param_ls[i_dh2])
+                                detector_method_ls.remove(detector_method_ls[i_dh2])                                
+                                i_dh2 = i_dh2 - 1  # since we removed 
+                            i_dh2 = i_dh2 + 1
+
+
+
+                        #### DH #### tracking when detectors are removed
 
                         new_coef_index_range_seq = []
                         for i in range(0, len(coef_index_range)): 
@@ -575,12 +683,12 @@ class AutoOD:
                         coef_index_range = np.array(coef_index_range)
                         index_range = np.array(index_range)
 
-                        L = L[:, remain_indexes_after_cond_expanded]
+                        L = L[:, remain_indexes_after_cond_expanded]  # DH: here we are updating detectors
                         scores_for_training = scores_for_training[:, remain_indexes_after_cond]
             if ((len(last_training_data_indexes) == len(data_indexes)) and
                     (sum(last_training_data_indexes == data_indexes) == len(data_indexes)) and
                     (np.max(coef_index_range) < 2)):
-                counter = counter + 1
+                counter = counter + 1  # early stop statment: no changes for 3 iterations -> stop
             else:
                 counter = 0
             if (counter > 3):
@@ -599,6 +707,16 @@ class AutoOD:
         if database == "y":  # DHDB
             #reliable_df = reliable_df.convert_dtypes()
             insert_input("reliable", reliable_df)
+        
+        #### DH ####
+        detectors_df = pd.DataFrame(list(zip(detector_prune_final, detector_f1_final, detector_id_final, detector_param_final, detector_method_final)), 
+        columns =['iteration_pruned', 'F1', 'id', 'parmiters', 'method'])
+        
+        #temp_keep_df = pd.DataFrame(list(zip(detector_keep_iter_ls, detector_keep_f1_ls)), columns = ['iter', 'f1'])
+        #temp_keep_df = temp_keep_df.groupby(['iter']).mean() 
+        detectors_df.to_csv("detector_prune_shuttle_test.csv", header=True, index=True)
+        #### DH ####
+
         # Prepare second round AutoOD
         index_range = np.array(instance_index_ranges)
         coef_index_range = np.array(detector_index_ranges)
@@ -788,6 +906,7 @@ class AutoOD:
                 self.logger.info(
                     f'Iteration = {i_range}, F-1 score = {metrics.f1_score(y, np.array([int(i) for i in clf_predict_proba_X > 0.5]))}')
                 cur_f1_scores.append(metrics.f1_score(y, np.array([int(i) for i in clf_predict_proba_X > 0.5])))
+                #f1_at_iter(f"2_{i_range}", len(X_training_data), len(L[0]), len(all_inlier_indexes), len(all_outlier_indexes), metrics.f1_score(y, np.array([int(i) for i in clf_predict_proba_X > 0.5])))  # DH
             else:
                 self.logger.info(f"Iteration = {i_range}")
 
