@@ -109,7 +109,7 @@ def load_dataset(filename, index_col_name = None, label_col_name=None):
         with open(filename, 'r') as f:
             data, meta = arff.loadarff(f)
         data = pd.DataFrame(data)
-        #data = data.sample(n=500, random_state = 15)  # DH: added to debug code locally
+        data = data.sample(n=500, random_state = 15)  # DH: added to debug code locally
         data = data.rename(columns={index_col_name :'id', label_col_name : 'label'})  # DH set all data to the same label and id col names
         index_col_name = 'id'
         label_col_name = 'label'
@@ -143,7 +143,7 @@ def load_dataset(filename, index_col_name = None, label_col_name=None):
         data = data.rename(columns={index_col_name :'id', label_col_name : 'label'})  # DH set all data to the same label and id col names
         index_col_name = 'id'
         label_col_name = 'label'
-        #data = data.sample(n=500, random_state = 15)  # DH: added to debug code locally
+        data = data.sample(n=500, random_state = 15)  # DH: added to debug code locally
         if database == "y":
             
             import psycopg2
@@ -412,7 +412,7 @@ class AutoOD:
         self.mv_f1_score = metrics.f1_score(y, predictions)
         self.logger.info(f'F1 for Majority Vote:{self.mv_f1_score}')
 
-    def autood_training(self, L, scores, X, y, instance_index_ranges, detector_index_ranges):
+    def autood_training(self, L, scores, X, y, instance_index_ranges, detector_index_ranges):  # add param here that is none on defult: takes in human labels
         L_prev = L
         scores_prev = scores
         prediction_result_list = []

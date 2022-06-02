@@ -34,6 +34,19 @@ var SVG = d3.select("#dataviz_axisZoom")
 d3.json("http://127.0.0.1:8080/data", function(data) {
     const xValue = (data) => data.tsne1;
     const yValue = (data) => data.tsne2;
+
+    var round = "round_1"  // global var to keep track of round
+    var count_round1 = 0
+    var count_round2 = 0
+    var curr_it = "reliable_" + (count_round1)
+
+    // get total number of iterations for each round
+    for (let i = 0; i < data.length; i++) {
+        var colname = String(Object.keys(data[0])[i])
+        if(colname.slice(0, 9) == "reliable_"){
+            count_round1 = count_round1 + 1
+        }
+    }
     
     // x-axis
     var x = d3.scaleLinear()
@@ -130,7 +143,7 @@ d3.json("http://127.0.0.1:8080/data", function(data) {
                 "KNN:" + " " + tooltip_int2str(d.prediction_knn) + "<br>" +
                 "IF:" + " " + tooltip_int2str(d.prediction_if) + "<br>" +
                 "Mahalanobis:" + " " + tooltip_int2str(d.prediction_mahalanobis) + "<br>" +
-                "Reliable Label?:" + " " + y_n_int2str(d.reliable_31) + "<br>"
+                "Reliable Label?:" + " " + y_n_int2str(eval("d.reliable_" + eval(count_round1-1))) + "<br>"
             
             ) 
             // location of the tooltip
@@ -209,16 +222,19 @@ d3.json("http://127.0.0.1:8080/data", function(data) {
             if(click_count% 2 == 0){
                 //data_tabel1(d.id, d.att1, d.att2, d.att3, d.att4, d.att5, d.att6, d.att7, d.att8, d.att9, d.att10) for page blocks
                 data_tabel1(d)
-               
-                detector_chart1(d.score_lof, d.score_knn, d.score_if, d.score_mahalanobis, d.prediction_if, d.prediction_knn, d.prediction_lof, d.prediction_mahalanobis)            
+                detector_chart1(d.score_lof, d.score_knn, d.score_if, d.score_mahalanobis, d.prediction_if, d.prediction_knn, d.prediction_lof, d.prediction_mahalanobis)
+                correct_label1(d.prediction, eval("d.reliable_" + eval(count_round1-1)))
             }
             else{
                 //data_tabel2(d.id, d.att1, d.att2, d.att3, d.att4, d.att5, d.att6, d.att7, d.att8, d.att9, d.att10)
                 data_tabel2(d)
                 detector_chart2(d.score_lof, d.score_knn, d.score_if, d.score_mahalanobis, d.prediction_if, d.prediction_knn, d.prediction_lof, d.prediction_mahalanobis)
+                correct_label2(d.prediction, eval("d.reliable_" + eval(count_round1-1)))
 
             }
+            console.log(eval("d.reliable_" + eval(count_round1-1)));
         })
+
 
 
     // function to create pop-up barchart of detectors     
@@ -756,19 +772,6 @@ d3.json("http://127.0.0.1:8080/data", function(data) {
 
     
     // reliable labels slider
-    var round = "round_1"  // global var to keep track of round
-    var count_round1 = 0
-    var count_round2 = 0
-    var curr_it = "reliable_" + (count_round1)
-
-    // get total number of iterations for each round
-    for (let i = 0; i < data.length; i++) {
-        var colname = String(Object.keys(data[0])[i])
-        if(colname.slice(0, 9) == "reliable_"){
-            count_round1 = count_round1 + 1
-        }
-    }
-
     var sliderStep = d3
         .sliderBottom()
         .min(1)
@@ -832,8 +835,78 @@ d3.json("http://127.0.0.1:8080/data", function(data) {
 
     }
 
+    // Allow for user to correct outputs and rerun autoOD
+    function correct_label1(pred, reliable){
+        var T = document.getElementById("change_reliable_div1");
+        T.style.display = "block";
+        var T2 = document.getElementById("radio1");
+        T2.style.display = "block";
 
-    // button to switch between round 1 and 2
+        if(reliable == 1){
+            document.getElementById("checkbox1").checked = true;  // set defualt value of if point is reliable object
+        }
+        else{
+            document.getElementById("checkbox1").checked = false;  // set defualt value of if point is reliable object
+        }
+
+        d3.select("#change_reliable1").html(null)  // empty elemnts
+        
+        if(pred == 1){  // we want the pred value to be defult when user clicks on a point
+            var options = ["Outlier", "Inlier"]
+        }
+        else{
+            var options = ["Inlier", "Outlier"]
+        }
+        d3.select("#change_reliable1")
+        .selectAll('myOptions')
+     	    .data(options)
+        .enter()
+    	    .append('option')
+        .text(function (d) {return d;}) // text
+        .attr("value", function (d) { return d; }) // value from user input
+
+    }
+
+    function correct_label2(pred, reliable){
+        var T = document.getElementById("change_reliable_div2");
+        T.style.display = "block";
+        var T2 = document.getElementById("radio2");
+        T2.style.display = "block";
+
+        if(reliable == 1){
+            document.getElementById("checkbox2").checked = true;  // set defualt value of if point is reliable object
+        }
+        else{
+            document.getElementById("checkbox2").checked = false;  // set defualt value of if point is reliable object
+        }
+
+        d3.select("#change_reliable2").html(null)  // empty elemnts
+        
+        if(pred == 1){  // we want the pred value to be defult when user clicks on a point
+            var options = ["Outlier", "Inlier"]
+        }
+        else{
+            var options = ["Inlier", "Outlier"]
+        }
+        d3.select("#change_reliable2")
+        .selectAll('myOptions')
+     	    .data(options)
+        .enter()
+    	    .append('option')
+        .text(function (d) {return d;}) // text
+        .attr("value", function (d) { return d; }) // value from user input
+
+    }
+
+
+    
+    
+    
+    
+    
+    
+    
+        // button to switch between round 1 and 2
     // var options = [" ", "round 1", "round 2"]
     // d3.select("#selectButton_round")
     //     //.style("position", "absolute")

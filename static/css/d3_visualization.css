@@ -4,6 +4,7 @@
 
 html{
     /* font-family: 'Open Sans', sans-serif; */
+    overflow: scroll;
 }
 
 
@@ -336,5 +337,51 @@ li a {
 #body_results{
     z-index: 100;
 }
+
+#change_reliable_div{
+    position: relative;
+    bottom: -828px;
+    left: 587px;
+}
+
+#change_reliable1{
+    position: absolute;
+    width: 175px;
+    height: 30px;
+    border-radius:5px;
+    font-size: 15px;
+    bottom: -30px;
+    left: 750px;
+}
+
+#change_reliable2{
+    position: absolute;
+    width: 175px;
+    height: 30px;
+    border-radius:5px;
+    font-size: 15px;
+}
+
+#radio1{
+    position: absolute;
+    bottom: 7px;
+    left: 789px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 20px;
+}
+
+#radio2{
+    position: absolute;
+    bottom: 7px;
+    left: 398px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 20px;
+}
+
+input[type=checkbox] {
+    transform: scale(1.2);
+}
+
+
 
  
