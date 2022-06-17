@@ -25,6 +25,8 @@ import csv
 
 database = "y"  # DHDB "y" if we want to connect to database for demo
 
+debug_small_n = 'n'  # "y" if we want smaller dataset for debugging
+
 def addapt_numpy_float64(numpy_float64):
     return AsIs(numpy_float64)
 def addapt_numpy_int64(numpy_int64):
@@ -109,7 +111,8 @@ def load_dataset(filename, index_col_name = None, label_col_name=None):
         with open(filename, 'r') as f:
             data, meta = arff.loadarff(f)
         data = pd.DataFrame(data)
-        data = data.sample(n=500, random_state = 15)  # DH: added to debug code locally
+        if debug_small_n == 'y':
+            data = data.sample(n=500, random_state = 15)  # DH: added to debug code locally
         data = data.rename(columns={index_col_name :'id', label_col_name : 'label'})  # DH set all data to the same label and id col names
         index_col_name = 'id'
         label_col_name = 'label'
@@ -143,7 +146,8 @@ def load_dataset(filename, index_col_name = None, label_col_name=None):
         data = data.rename(columns={index_col_name :'id', label_col_name : 'label'})  # DH set all data to the same label and id col names
         index_col_name = 'id'
         label_col_name = 'label'
-        data = data.sample(n=500, random_state = 15)  # DH: added to debug code locally
+        if debug_small_n == 'y':
+            data = data.sample(n=500, random_state = 15)  # DH: added to debug code locally
         if database == "y":
             
             import psycopg2

@@ -137,7 +137,6 @@ def send_data():
     params = config()  # get DB info from config.py
     conn = psycopg2.connect(**params)
     cur = conn.cursor()
-    
     # we can use multiple execute statements to get the data how we need it
     cur.execute("SELECT max(iteration) FROM reliable")  # number of iterations for reliable labels
     iteration = cur.fetchall()[0][0] + 1

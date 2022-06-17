@@ -232,7 +232,6 @@ d3.json("http://127.0.0.1:8080/data", function(data) {
                 correct_label2(d.prediction, eval("d.reliable_" + eval(count_round1-1)))
 
             }
-            console.log(eval("d.reliable_" + eval(count_round1-1)));
         })
 
 
