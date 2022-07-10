@@ -4,3 +4,13 @@ AutoOD is a self-tuning anomaly detection system to address the challenges of me
 AutoOD outperforms the best unsupervised anomaly detection methods, yielding results similar to supervised methods that have access to ground truth labels. 
 
 This work has been accepted for publication at VLDB 2022 (48th International Conference on Very Large Databases) one of the most prestigious conferences in database systems.
+
+![Alt text](https://github.com/dhofmann34/AutoOD_Demo/blob/main/screenshots/architecture.jpg "AutoOD Architecture")
+
+
+![Alt text](https://github.com/dhofmann34/AutoOD_Demo/blob/main/screenshots/input.png "Input Interface")
+Users can upload data, provide their own anomaly detection methods, specify the column of labels, and customize the expected percentage range of anomalies in their dataset.
+
+
+![Alt text](https://github.com/dhofmann34/AutoOD_Demo/blob/main/screenshots/results.jpg "Data Analytics Display")
+Users can filter the chart based on metrics provided and interact with points by hovering over them to view summery statistics. Clicking on a point will provide that respective point's anomaly score for each unsupervised detector and attribute values from the input dataset. In addition, by moving the slider through each iteration, the user can watch the reliable object set change, and at any time select a point to view the contribution of each detector to its status.
