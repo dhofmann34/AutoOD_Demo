@@ -724,7 +724,7 @@ d3.json("http://127.0.0.1:8080/data", function(data) {
         .domain([0, 1])
         .range(["#F0F0F0", function (d){return color(d.prediction)}])    
     
-        // function to update mark color based on reliable label interation
+        // function to update mark color based on reliable label interaction
     function update_reliable(selectedOption) {
         scatter  // reset colors
                 .selectAll("circle")

@@ -124,7 +124,8 @@ nav = Navigation(app)
 
 nav.Bar('top', [
     nav.Item('Input Page', 'autood_form'),
-    nav.Item('Result Page', 'result_index')
+    nav.Item('Result Page', 'result_index'),
+    nav.Item('Rerun', 'autood_form')
     
 ])
 

@@ -25,7 +25,7 @@ import csv
 
 database = "y"  # DHDB "y" if we want to connect to database for demo
 
-debug_small_n = 'n'  # "y" if we want smaller dataset for debugging
+debug_small_n = 'y'  # "y" if we want smaller dataset for debugging
 
 def addapt_numpy_float64(numpy_float64):
     return AsIs(numpy_float64)
