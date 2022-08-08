@@ -21,10 +21,8 @@ Users can upload data, provide their own anomaly detection methods, specify the 
 Users can filter the chart based on metrics provided and interact with points by hovering over them to view summery statistics. Clicking on a point will provide that respective point's anomaly score for each unsupervised detector and attribute values from the input dataset. In addition, by moving the slider through each iteration, the user can watch the reliable object set change, and at any time select a point to view the contribution of each detector to its status.
 
 ## Instructions:
+To run AutoOD, download the code and fill out the "database_temp.ini" file with the information required to connect to a local PostgreSQL database. Once completed rename the file "database.ini". Now running the command "python app.py" in a terminal at the root of the project directory will lunch AutoOD on a local webserver.
+Python version: 3.9.12
+Please see requirments.txt for libraries and their versions
 
-Fill in the blank database form with your information
-run python app.py 
-
-
-
-"Hosted Web version coming soon and link will be provided here"
+A hosted web version of AutoOD is coming soon. The link will be provided here.
