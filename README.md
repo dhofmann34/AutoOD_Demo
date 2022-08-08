@@ -24,6 +24,6 @@ Users can filter the chart based on metrics provided and interact with points by
 To run AutoOD, download the code and fill out the "database_temp.ini" file with the information required to connect to a local PostgreSQL database. Once completed rename the file "database.ini". Now running the command "python app.py" in a terminal at the root of the project directory will lunch AutoOD on a local webserver.
 
 Python version: 3.9.12 <br>
-Please see requirments.txt for libraries and their versions
+Please see requirements.txt for libraries and their versions
 
 A hosted web version of AutoOD is coming soon. The link will be provided here.
