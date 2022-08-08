@@ -9,10 +9,10 @@
 	src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <!-- DH -->
 <body> 
-    <ul>
+    <ul id="ul_nav">
         {% for item in nav.top %}
         <li id = "nav" class="{{ 'active' if item.is_active else '' }}">
-            <a href="{{ item.url }}">{{ item.label }}</a>
+            <a id="li_a_nav" href="{{ item.url }}">{{ item.label }}</a>
         </li>
         {% endfor %}
     </ul>
@@ -50,6 +50,10 @@
                 <td>Best Unsupervised Detector</td>
                 <td>{{best_method}}</td>
             </tr>
+            <tr>
+                <td>F-1 of Best Ensemble Method</td>
+                <td>X</td>
+            </tr>
         </table>
     </form>
 
@@ -58,7 +62,7 @@
     <table>
         <tr>
             <td>Detection Results:</td>
-            <td><a href="/return-files/{{final_results}}"  target="_blank"><i class="fa fa-download" aria-hidden="true"></i>Outlier Results</a></td>
+            <td><a id="download_results" href="/return-files/{{final_results}}"  target="_blank"><i class="fa fa-download" aria-hidden="true"></i>Outlier Results</a></td>
         </tr>
     </table>
     {% endif %}
@@ -68,10 +72,14 @@
     <table>
         <tr>
             <td>Training Log:</td>
-            <td><a href="/return-files/{{training_log}}" target="_blank"><i class="fa fa-download" aria-hidden="true"></i>Training Log</a></td>
+            <td><a id="download_log" href="/return-files/{{training_log}}" target="_blank"><i class="fa fa-download" aria-hidden="true"></i>Training Log</a></td>
         </tr>
     </table>
     {% endif %}
 
+    <br>
+    <button onclick="location.href = 'http://127.0.0.1:8080/autood/result';" id="myButton" class="float-left submit-button" >Results Page</button>
+
 </center>
+
 </body>

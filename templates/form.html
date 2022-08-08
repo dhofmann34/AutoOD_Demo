@@ -1,6 +1,6 @@
 <!doctype html>
 <head>
-    <title>AutoOD: Automatic Outlier Detection</title>
+    <title>AutoOD: A Self-Tuning Anomaly Detection System</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/multiselect.css') }}"/>
@@ -10,10 +10,10 @@
 
 <!-- DH -->
 <body> 
-    <ul>
+    <ul id="ul_nav">
         {% for item in nav.top %}
         <li id = "nav" class="{{ 'active' if item.is_active else '' }}">
-            <a href="{{ item.url }}">{{ item.label }}</a>
+            <a id="li_a_nav" href="{{ item.url }}">{{ item.label }}</a>
         </li>
         {% endfor %}
     </ul>
@@ -62,7 +62,7 @@
 </script>
 <body>
 <div class="header" style="text-align:center">
-    <h1>AutoOD: Automatic Outlier Detection</h1>
+    <h1>AutoOD: A Self-Tuning Anomaly Detection System</h1>
 </div>
 <center>
     <h3>Enter Input File and Parameters</h3>

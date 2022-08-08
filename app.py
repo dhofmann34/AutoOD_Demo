@@ -1,3 +1,4 @@
+from cgi import test
 from flask import Flask
 from flask import Flask, request, render_template, flash, redirect, url_for, Response, send_file
 from werkzeug.utils import secure_filename
@@ -10,6 +11,8 @@ import psycopg2
 from flask import jsonify
 from config import config
 
+results_global = None
+final_log_filename_global = None
 
 LOGGING_PATH = "static/job.log"
 # configure logger
@@ -28,9 +31,24 @@ ALLOWED_EXTENSIONS = {'arff', 'csv'}
 def home():
     return redirect('/autood/index')
 
+@app.route('/autood/results_summary', methods=['GET']) #DH
+def results1():
+    results = results_global
+    final_log_filename = final_log_filename_global
+    try:
+        return render_template('result_summary.html', best_f1=results.best_unsupervised_f1_score,
+                                    autood_f1=results.autood_f1_score, mv_f1=results.mv_f1_score,
+                                    best_method=",".join(results.best_unsupervised_methods),
+                                    final_results=results.results_file_name, training_log=final_log_filename)
+    except:
+        return render_template('result_summary.html')
 
 @app.route('/autood/index', methods=['GET'])
 def autood_form():
+    return render_template('form.html')
+
+@app.route('/autood/index', methods=['GET'])
+def autood_form2():
     return render_template('form.html')
 
 
@@ -85,7 +103,7 @@ def autood_input():
         outlier_range_max = float(request.form['outlierRangeMax'])
         detection_methods = get_detection_methods(request.form.getlist('detectionMethods'))
         if not detection_methods:
-            flash('Please choose at least one detection method....')
+            flash('Please choose at least one detection method.')
             return redirect(request.url)
         results = call_autood(filename, outlier_range_min, outlier_range_max, detection_methods, index_col_name, label_col_name)
         if results.error_message:
@@ -96,6 +114,9 @@ def autood_input():
             final_log_filename = f"log_{file.filename.replace('.', '_')}_{int(time.time())}"
             copyfile(LOGGING_PATH, DOWNLOAD_FOLDER + final_log_filename)
             open(LOGGING_PATH, 'w').close()
+            global results_global, final_log_filename_global
+            results_global = results
+            final_log_filename_global = final_log_filename
             return render_template('result_summary.html', best_f1=results.best_unsupervised_f1_score,
                                    autood_f1=results.autood_f1_score, mv_f1=results.mv_f1_score,
                                    best_method=",".join(results.best_unsupervised_methods),
@@ -124,10 +145,15 @@ nav = Navigation(app)
 
 nav.Bar('top', [
     nav.Item('Input Page', 'autood_form'),
+    nav.Item('Results Summary', 'results1'),
     nav.Item('Result Page', 'result_index'),
-    nav.Item('Rerun', 'autood_form')
-    
+    nav.Item('Rerun', 'autood_form2'),
+    nav.Item('About', 'about_form')
 ])
+
+@app.route('/autood/about', methods=['GET'])
+def about_form():
+    return render_template('about.html')
 
 @app.route('/autood/result', methods=['GET'])
 def result_index():

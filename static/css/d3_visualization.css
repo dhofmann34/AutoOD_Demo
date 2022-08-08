@@ -1,5 +1,6 @@
 #body_results{
-    background-color: #EFEEF1;
+    background-color: #efeef1cb;
+    z-index: 100;
 }
 
 html{
@@ -15,9 +16,12 @@ h1{
     margin-left: auto; 
     margin-right: auto; 
     width: 700px; 
-    font-family: 'Open Sans', sans-serif;
+    font-family: sans-serif;
     padding-left: .5%;
     top: 2.5%;
+    white-space: nowrap;
+    color: black;
+    /* font-size: 30px; */
 }
 
 center{
@@ -296,31 +300,36 @@ select{
     font-size: 15px;
 } */
 
-ul{
+#ul_nav{
     position: fixed;
     top: 0;
+    left: 0;
     width: 100%;
     list-style-type: none;
     margin: 0;
     padding: 0;
     overflow: hidden;
     background-color: #333;
-    padding-bottom: .5%;
-    padding-top: .5%;
-    font-family: 'Open Sans', sans-serif;
+    font-family: sans-serif;  /* This is what is causing the different sizing in bar */
     font-size: 20px;
-    z-index: 3
+    z-index: 100;
 }
 
-li {
-    display: inline;
+#nav{
+    float: left;
+    border-right:1px solid #bbb;
 }
 
-li a {  
+#nav:last-child {
+    border-right: none;
+  }
+
+#li_a_nav {  
+    display: block;
     color: white;
-    padding: 14px 16px;
-    text-decoration: none;
-   
+    text-align: center;
+    padding: 8px 16px;
+    text-decoration: none;  
   }
   
   /* Change the link color to #111 (black) on hover */
@@ -330,13 +339,7 @@ li a {
 
   .active {
     background-color: maroon;
-    padding-bottom: .5%;
-    padding-top: .5%;
   }
-
-#body_results{
-    z-index: 100;
-}
 
 #change_reliable_div{
     position: relative;
@@ -382,6 +385,35 @@ input[type=checkbox] {
     transform: scale(1.2);
 }
 
+#myButton{
+    font-family: 'Open Sans', sans-serif;
+    font-size: 20px;
+}
+
+#about_para{
+    position: absolute;    
+    margin-left: 5%;
+    margin-right: 5%;
+    background-color: white;
+    top: 110px;
+    border-radius:10px;
+    padding: 20px;
+    font-family: 'Open Sans', sans-serif;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+}
+
+#download_results{
+    position: relative;
+    left: -85px;
+    
+    
+}
+
+#download_log{
+    position: relative;
+    left: -48px;
+
+}
 
 
  

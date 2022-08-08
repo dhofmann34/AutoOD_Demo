@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+    <body id=body_results> 
+        <ul id="ul_nav">
+            {% for item in nav.top %}
+            <li id = "nav" class="{{ 'active' if item.is_active else '' }}">
+                <a id="li_a_nav" href="{{ item.url }}">{{ item.label }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </body>
+    <head>
+        <title>About Page</title>
+        <!-- <h1 style="text-align:center">AutoOD Results</h1> -->
+        <!-- Load d3.js -->
+        <script src="https://d3js.org/d3.v4.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/d3_visualization.css') }}"> 
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+        <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+        <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+        <script src="https://unpkg.com/d3-simple-slider"></script>
+        <script src="{{ url_for('static', filename='css/d3_visualization.js') }}" defer></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@500&display=swap" rel="stylesheet">
+    </head>
+
+  
+        <h1>AutoOD: A Self-Tuning Anomaly Detection System</h1>
+
+        <p id="about_para">
+            <b>About AutoOD:</b>
+            <br>
+            AutoOD is a self-tuning anomaly detection system designed to address the challenges of method selection and hyper-parameter tuning while remaining unsupervised. 
+            AutoOD frees users from the tedious manual tuning process often required for anomaly detection by intelligently identifying high likelihood inliers and outliers. 
+            AutoOD features a responsive visual interface allowing for seamless interaction providing the user with insightful knowledge of how AutoOD operates. AutoOD outperforms 
+            the best unsupervised anomaly detection methods, yielding results similar to supervised methods that have access to ground truth labels.
+            <br>
+            <br>
+            This work has been accepted for publication at VLDB 2022 (48th International Conference on Very Large Databases) one of the most prestigious conferences in database systems.
+            <br>
+            <br>
+            <b>Getting Started:</b>
+            First, upload the dataset you are interested in examining. AutoOD currently accepts CSV and ARFF files. Next, select the unsupervised outlier detection methods you 
+            want to run AutoOD with, and provide the column names for the id column and label column from your dataset. Lastly, input the minimum and maximum percentage range for 
+            the number of outliers you expect are contained within your dataset.
+            <br>
+            <br>
+            <b>The Team:</b> <a href="https://davis.wpi.edu/dsrg/PROJECTS/AnomalyDetection/" target="_blank" rel="noopener noreferrer">WPI Anomaly Detection</a>
+            <br>
+            <b>GitHub</b> <a href="https://github.com/dhofmann34/AutoOD_Demo" target="_blank" rel="noopener noreferrer">AutoOD Demo</a>
+
+        </p>
+
+
+
+
+
