@@ -7,6 +7,7 @@ AutoOD outperforms the best unsupervised anomaly detection methods, yielding res
 
 This work has been accepted for publication at VLDB 2022 (48th International Conference on Very Large Databases) one of the most prestigious conferences in database systems.
 
+Current hosted version: http://autood.csail.mit.edu/autood/index
 
 ### AutoOD Architecture:
 ![Alt text](https://github.com/dhofmann34/AutoOD_Demo/blob/main/screenshots/architecture.jpg "AutoOD Architecture")
