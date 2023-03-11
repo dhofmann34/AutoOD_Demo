@@ -5,7 +5,7 @@ AutoOD is a self-tuning anomaly detection system to address the challenges of me
 
 AutoOD outperforms the best unsupervised anomaly detection methods, yielding results similar to supervised methods that have access to ground truth labels. 
 
-This work has been accepted for publication at VLDB 2022 (48th International Conference on Very Large Databases) one of the most prestigious conferences in database systems.
+This work has been accepted for publication at VLDB 2022 (48th International Conference on Very Large Databases) one of the most prestigious conferences in database systems. https://dl.acm.org/doi/abs/10.14778/3554821.3554880
 
 Current hosted version: http://autood.csail.mit.edu/autood/index
 
