@@ -9,6 +9,9 @@ This work has been accepted for publication at VLDB 2022 (48th International Con
 
 Current hosted version: http://autood.csail.mit.edu/autood/index
 
+This work was supported in part by NSF under grants IIS1910880, CSSI-2103832, CNS-1852498, NRT-HDR-1815866 and by
+the U.S. Dept. of Education under grant P200A180088.
+
 ### AutoOD Architecture:
 ![Alt text](https://github.com/dhofmann34/AutoOD_Demo/blob/main/screenshots/architecture.jpg "AutoOD Architecture")
 
