@@ -7,7 +7,7 @@ AutoOD outperforms the best unsupervised anomaly detection methods, yielding res
 
 This work has been accepted for publication at VLDB 2022 (48th International Conference on Very Large Databases) one of the most prestigious conferences in database systems. https://dl.acm.org/doi/abs/10.14778/3554821.3554880
 
-Current hosted version: http://autood.csail.mit.edu/autood/index
+Current hosted version: https://autood.wpi.edu/
 
 This work was supported in part by NSF under grants IIS1910880, CSSI-2103832, CNS-1852498, NRT-HDR-1815866 and by
 the U.S. Dept. of Education under grant P200A180088.
