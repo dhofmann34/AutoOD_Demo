@@ -29,5 +29,3 @@ To run AutoOD, download the code and fill out the "database_temp.ini" file with 
 
 Python version: 3.9.12 <br>
 Please see requirements.txt for libraries and their versions
-
-A hosted web version of AutoOD is coming soon. The link will be provided here.
